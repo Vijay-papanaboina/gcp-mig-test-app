@@ -3,6 +3,9 @@ name: Build Image and Deploy to MIG
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'load-test.js'
 
 jobs:
   deploy:
