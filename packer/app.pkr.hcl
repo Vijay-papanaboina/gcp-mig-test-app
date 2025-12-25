@@ -50,18 +50,7 @@ build {
       "sudo npm install",
 
       # systemd service
-      "sudo bash -c 'cat <<EOF > /etc/systemd/system/test-app.service
-[Unit]
-Description=Test App
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/node /opt/app/main.js
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF'",
+      "sudo bash -c 'printf \"[Unit]\\nDescription=Test App\\nAfter=network.target\\n\\n[Service]\\nExecStart=/usr/bin/node /opt/app/main.js\\nRestart=always\\n\\n[Install]\\nWantedBy=multi-user.target\\n\" > /etc/systemd/system/test-app.service'",
 
       "sudo systemctl daemon-reload",
       "sudo systemctl enable test-app.service"
