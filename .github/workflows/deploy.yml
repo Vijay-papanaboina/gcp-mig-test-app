@@ -35,10 +35,14 @@ jobs:
           --format="value(name)")
 
         gcloud compute instance-templates create test-app-template-$GITHUB_RUN_ID \
-          --machine-type=e2-medium \
+          --machine-type=e2-small \
+          --boot-disk-size=12GB \
+          --boot-disk-type=pd-standard \
           --image=$IMAGE \
           --image-project=learning-gcp-22 \
-          --tags=http-server
+          --network=default \
+          --no-address \
+          --tags=http-server,allow-health-check
 
     - name: Rolling update MIG
       run: |

@@ -8,13 +8,18 @@ packer {
 }
 
 source "googlecompute" "app" {
-  project_id          = "learning-gcp-22"
-  zone                = "asia-south1-c"
-  source_image_family = "ubuntu-2204-lts"
+  project_id              = "learning-gcp-22"
+  zone                    = "asia-south1-c"
+  source_image_family     = "ubuntu-2204-lts"
   source_image_project_id = ["ubuntu-os-cloud"]
+  
+  # Faster build VM (doesn't affect final instances)
+  machine_type = "n2-standard-2"
+  disk_size    = 15
+  disk_type    = "pd-standard"
 
-  ssh_username        = "packer"
-  image_name          = "test-app-{{timestamp}}"
+  ssh_username = "packer"
+  image_name   = "test-app-{{timestamp}}"
 }
 
 build {
