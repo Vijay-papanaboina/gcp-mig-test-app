@@ -15,7 +15,7 @@ source "googlecompute" "app" {
   
   # Faster build VM (doesn't affect final instances)
   machine_type = "n2-standard-2"
-  disk_size    = 15
+  disk_size    = 12
   disk_type    = "pd-standard"
 
   ssh_username = "packer"
