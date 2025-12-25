@@ -11,7 +11,7 @@ source "googlecompute" "app" {
   project_id          = "learning-gcp-22"
   zone                = "asia-south1-c"
   source_image_family = "ubuntu-2204-lts"
-  source_image_project_id = "ubuntu-os-cloud"
+  source_image_project_id = ["ubuntu-os-cloud"]
 
   ssh_username        = "packer"
   image_name          = "test-app-{{timestamp}}"
