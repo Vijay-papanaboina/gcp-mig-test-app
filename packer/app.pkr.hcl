@@ -40,7 +40,10 @@ build {
   provisioner "shell" {
     inline = [
       "sudo apt update",
-      "sudo apt install -y nodejs npm",
+      
+      # Install Node.js 20.x from NodeSource
+      "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -",
+      "sudo apt install -y nodejs",
 
       "sudo mkdir -p /opt/app",
       "sudo mv /tmp/main.js /opt/app/",
