@@ -20,37 +20,51 @@ source "googlecompute" "app" {
 build {
   sources = ["source.googlecompute.app"]
 
-  # Copy app
+  # Copy app files
   provisioner "file" {
-    source      = "../app"
-    destination = "/opt/app"
+    source      = "../main.js"
+    destination = "/tmp/main.js"
+  }
+
+  provisioner "file" {
+    source      = "../package.json"
+    destination = "/tmp/package.json"
+  }
+
+  provisioner "file" {
+    source      = "../package-lock.json"
+    destination = "/tmp/package-lock.json"
   }
 
   # Install Node + systemd service
   provisioner "shell" {
     inline = [
-      "apt update",
-      "apt install -y nodejs npm",
+      "sudo apt update",
+      "sudo apt install -y nodejs npm",
 
+      "sudo mkdir -p /opt/app",
+      "sudo mv /tmp/main.js /opt/app/",
+      "sudo mv /tmp/package.json /opt/app/",
+      "sudo mv /tmp/package-lock.json /opt/app/",
       "cd /opt/app",
-      "npm install",
+      "sudo npm install",
 
       # systemd service
-      "cat <<'EOF' > /etc/systemd/system/test-app.service",
-      "[Unit]",
-      "Description=Test App",
-      "After=network.target",
-      "",
-      "[Service]",
-      "ExecStart=/usr/bin/node /opt/app/app.js",
-      "Restart=always",
-      "",
-      "[Install]",
-      "WantedBy=multi-user.target",
-      "EOF",
+      "sudo bash -c 'cat <<EOF > /etc/systemd/system/test-app.service
+[Unit]
+Description=Test App
+After=network.target
 
-      "systemctl daemon-reload",
-      "systemctl enable test-app.service"
+[Service]
+ExecStart=/usr/bin/node /opt/app/main.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF'",
+
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable test-app.service"
     ]
   }
 }
