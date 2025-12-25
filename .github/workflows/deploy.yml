@@ -1,0 +1,15 @@
+name: Build Image and Deploy to MIG
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: prints cores and memory
+        run: |
+          nproc
+          free -mh 
