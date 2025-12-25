@@ -22,23 +22,21 @@ jobs:
       uses: hashicorp/setup-packer@v3
 
     - name: Build GCP image
+      id: build_image
       working-directory: packer
       run: |
         packer init .
-        packer build .
+        packer build . 2>&1 | tee build.log
+        IMAGE=$(grep -oP "test-app-\d+" build.log | tail -1)
+        echo "image_name=$IMAGE" >> $GITHUB_OUTPUT
 
     - name: Create new instance template
       run: |
-        IMAGE=$(gcloud compute images list \
-          --sort-by=~creationTimestamp \
-          --limit=1 \
-          --format="value(name)")
-
         gcloud compute instance-templates create test-app-template-$GITHUB_RUN_ID \
           --machine-type=e2-small \
           --boot-disk-size=12GB \
           --boot-disk-type=pd-standard \
-          --image=$IMAGE \
+          --image=${{ steps.build_image.outputs.image_name }} \
           --image-project=learning-gcp-22 \
           --network=default \
           --no-address \
