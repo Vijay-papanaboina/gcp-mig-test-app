@@ -9,7 +9,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: prints cores and memory
-        run: |
-          nproc
-          free -mh 
+    - uses: actions/checkout@v4
+
+    # Authenticate to GCP (OIDC / SA key)
+    - uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - uses: google-github-actions/setup-gcloud@v2
+
+    - name: Install Packer
+      uses: hashicorp/setup-packer@v3
+
+    - name: Build GCP image
+      working-directory: packer
+      run: |
+        packer init .
+        packer build .
+
+    - name: Create new instance template
+      run: |
+        IMAGE=$(gcloud compute images list \
+          --sort-by=~creationTimestamp \
+          --limit=1 \
+          --format="value(name)")
+
+        gcloud compute instance-templates create test-app-template-$GITHUB_RUN_ID \
+          --machine-type=e2-medium \
+          --image=$IMAGE \
+          --image-project=learning-gcp-22 \
+          --tags=http-server
+
+    - name: Rolling update MIG
+      run: |
+        gcloud compute instance-groups managed rolling-action start-update test-app-mig \
+          --version=template=test-app-template-$GITHUB_RUN_ID \
+          --zone=asia-south1-c \
+          --max-unavailable=1
