@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - '**.md'
-      - 'load-test.js'
+      - 'load-test*'
 
 jobs:
   deploy:

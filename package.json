@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node main.js",
     "dev": "node --watch main.js",
-    "load-test": "node load-test.js"
+    "load-test": "node load-test.js",
+    "load-test-ramp": "node load-test-ramp.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
