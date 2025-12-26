@@ -1,5 +1,7 @@
 import autocannon from "autocannon";
-const TARGET_URL = "http://35.207.215.167";
+// const TARGET_URL = "http://35.207.215.167";
+const TARGET_URL =
+  "https://gcp-mig-test-app-cloud-run-824626066809.asia-south1.run.app";
 
 console.log("🔥 Starting load test with autocannon");
 console.log(`🎯 Target: ${TARGET_URL}`);

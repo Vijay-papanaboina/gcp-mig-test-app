@@ -12,7 +12,7 @@ source "googlecompute" "app" {
   zone                    = "asia-south1-c"
   source_image_family     = "ubuntu-2204-lts"
   source_image_project_id = ["ubuntu-os-cloud"]
-  
+
   # Faster build VM (doesn't affect final instances)
   machine_type = "n2-standard-2"
   disk_size    = 12
@@ -41,11 +41,16 @@ build {
     destination = "/tmp/package-lock.json"
   }
 
+  provisioner "file" {
+    source      = "./test-app.service"
+    destination = "/tmp/test-app.service"
+  }
+
   # Install Node + systemd service
   provisioner "shell" {
     inline = [
       "sudo apt update",
-      
+
       # Install Node.js 20.x from NodeSource
       "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -",
       "sudo apt install -y nodejs",
@@ -58,7 +63,7 @@ build {
       "sudo npm install",
 
       # systemd service
-      "sudo bash -c 'printf \"[Unit]\\nDescription=Test App\\nAfter=network.target\\n\\n[Service]\\nExecStart=/usr/bin/node /opt/app/main.js\\nRestart=always\\n\\n[Install]\\nWantedBy=multi-user.target\\n\" > /etc/systemd/system/test-app.service'",
+      "sudo mv /tmp/test-app.service /etc/systemd/system/test-app.service",
 
       "sudo systemctl daemon-reload",
       "sudo systemctl enable test-app.service"
