@@ -57,8 +57,8 @@ jobs:
             --machine-type=e2-medium \
             --tags=http-server,allow-health-check \
             --network=default \
-            --service-account=test-app-sa@learning-gcp-22.iam.gserviceaccount.com \
-            --scopes=https://www.googleapis.com/auth/cloud-platform \
+            --service-account=terraform-admin@learning-gcp-22.iam.gserviceaccount.com \
+            --scopes=https://www.googleapis.com/auth/devstorage.full_control \
             --boot-disk-size=10GB \
             --boot-disk-type=pd-standard \
             --image-project=cos-cloud \
