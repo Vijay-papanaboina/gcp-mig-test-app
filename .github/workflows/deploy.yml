@@ -79,4 +79,5 @@ jobs:
             --zone=$REGION-c \
             --max-unavailable=100% \
             --max-surge=0 \
+            --replacement-method=recreate \
             --project=$PROJECT_ID
