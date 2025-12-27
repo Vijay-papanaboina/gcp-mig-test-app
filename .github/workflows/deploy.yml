@@ -77,7 +77,5 @@ jobs:
           gcloud compute instance-groups managed rolling-action start-update test-app-mig \
             --version=template=$TEMPLATE_NAME \
             --zone=$REGION-c \
-            --max-unavailable=100% \
-            --max-surge=0 \
             --replacement-method=recreate \
             --project=$PROJECT_ID
