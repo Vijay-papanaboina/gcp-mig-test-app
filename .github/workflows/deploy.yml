@@ -40,6 +40,5 @@ jobs:
         run: |
           gcloud compute instance-groups managed rolling-action restart test-app-mig \
             --zone=$REGION-c \
-            --max-unavailable=1
           
           echo "Rolling restart started - instances will pull new container image"
