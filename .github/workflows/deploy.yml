@@ -54,7 +54,6 @@ jobs:
             --container-image=gcr.io/$PROJECT_ID/test-app:$VERSION \
             --container-restart-policy=always \
             --container-env=VERSION=$VERSION \
-
             --machine-type=e2-medium \
             --tags=http-server,allow-health-check \
             --network=default \
@@ -71,15 +70,10 @@ jobs:
           SAFE_VERSION=$(echo "$VERSION" | tr '.' '-')
           TEMPLATE_NAME="test-app-template-${SAFE_VERSION}"
           
-          echo "Updating MIG test-app-mig to use template: $TEMPLATE_NAME"
+          echo "Updating MIG test-app-mig to new template: $TEMPLATE_NAME"
           
-          gcloud compute instance-groups managed set-instance-template test-app-mig \
-            --template=$TEMPLATE_NAME \
-            --zone=$REGION-c \
-            --project=$PROJECT_ID
-            
-          echo "Updating MIG test-app-mig to use template: $TEMPLATE_NAME"
-
+          # Start rolling update to replace instances with new template
+          # This also implicitly sets the version for the MIG
           gcloud compute instance-groups managed rolling-action start-update test-app-mig \
             --version=template=$TEMPLATE_NAME \
             --zone=$REGION-c \
