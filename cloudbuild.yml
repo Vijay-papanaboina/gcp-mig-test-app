@@ -2,9 +2,14 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
+      - -t
       - gcr.io/learning-gcp-22/test-app:$_VERSION
+      - -t
+      - gcr.io/learning-gcp-22/test-app:latest
+      - .
 
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - gcr.io/learning-gcp-22/test-app:$_VERSION
+      - --all-tags
+      - gcr.io/learning-gcp-22/test-app
