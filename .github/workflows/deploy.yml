@@ -54,7 +54,7 @@ jobs:
             --container-image=gcr.io/$PROJECT_ID/test-app:$VERSION \
             --container-restart-policy=always \
             --container-env=VERSION=$VERSION \
-            --container-host-port-mappings=8080:8080 \
+
             --machine-type=e2-medium \
             --tags=http-server,allow-health-check \
             --network=default \
