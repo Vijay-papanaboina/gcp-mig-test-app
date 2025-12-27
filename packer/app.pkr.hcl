@@ -12,6 +12,7 @@ source "googlecompute" "app" {
   zone                    = "asia-south1-c"
   source_image_family     = "ubuntu-2204-lts"
   source_image_project_id = ["ubuntu-os-cloud"]
+  disk_size               = 12
 
   ssh_username = "packer"
   image_name   = "test-app-{{timestamp}}"
