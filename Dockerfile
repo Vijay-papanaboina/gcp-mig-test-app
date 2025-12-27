@@ -12,7 +12,7 @@ RUN npm install --production
 COPY main.js ./
 
 # Expose port 80
-EXPOSE 80
+EXPOSE 8080
 
 # Run as non-root user (Alpine node image has 'node' user)
 USER node

@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,13 +30,15 @@ app.get("/health", (req, res) => {
  */
 app.get("/", (req, res) => {
   burnCpu(1000); // adjust to control CPU usage
-  res.status(200).send("waited for 1 second. Image built using Packer with cloud build");
+  res
+    .status(200)
+    .send("waited for 1 second. Image built using Packer with cloud build");
 });
 
 /**
  * Start server
  */
-const PORT = 80;
+const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
