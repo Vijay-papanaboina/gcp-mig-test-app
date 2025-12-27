@@ -1,4 +1,4 @@
-name: Build Image and Deploy to MIG
+name: Build and Deploy Container to MIG
 
 on:
   push:
@@ -7,52 +7,39 @@ on:
       - '**.md'
       - 'load-test*'
 
+env:
+  PROJECT_ID: learning-gcp-22
+  REGION: asia-south1
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Authenticate to GCP (OIDC / SA key)
-    - uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - uses: google-github-actions/setup-gcloud@v2
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
 
-    - name: Trigger Cloud Build for image build
-      id: build_image
-      run: |
-        gcloud builds submit . \
-          --config packer/cloudbuild.yml \
-          --project learning-gcp-22
+      # Trigger Cloud Build to build & push Docker image
+      - name: Build Docker image with Cloud Build
+        run: |
+          gcloud builds submit . \
+            --config cloudbuild.yml \
+            --substitutions=COMMIT_SHA=${{ github.sha }} \
+            --project $PROJECT_ID
 
-    - name: Get latest image
-      id: get_image
-      run: |
-        IMAGE=$(gcloud compute images list --project=learning-gcp-22 \
-          --filter="name~'test-app-'" \
-          --sort-by="~creationTimestamp" \
-          --limit=1 \
-          --format="value(name)")
-        echo "image_name=$IMAGE" >> $GITHUB_OUTPUT
-
-    - name: Create new instance template
-      run: |
-        gcloud compute instance-templates create test-app-template-$GITHUB_RUN_ID \
-          --machine-type=e2-medium \
-          --boot-disk-size=12GB \
-          --boot-disk-type=pd-standard \
-          --image=${{ steps.get_image.outputs.image_name }} \
-          --image-project=learning-gcp-22 \
-          --network=default \
-          --no-address \
-          --tags=http-server,allow-health-check
-
-    - name: Rolling update MIG
-      run: |
-        gcloud compute instance-groups managed rolling-action start-update test-app-mig \
-          --version=template=test-app-template-$GITHUB_RUN_ID \
-          --zone=asia-south1-c \
-          --max-unavailable=1
+      # Restart MIG to pull new :latest
+      - name: Restart MIG instances
+        run: |
+          gcloud compute instance-groups managed rolling-action restart test-app-mig \
+            --zone=$REGION-c \
+            --max-unavailable=1
+          
+          echo "Rolling restart started - instances will pull new container image"
