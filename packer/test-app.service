@@ -3,7 +3,6 @@ Description=Test App
 After=network.target
 
 [Service]
-User=packer
 ExecStart=/usr/bin/node /opt/app/main.js
 Restart=always
 
