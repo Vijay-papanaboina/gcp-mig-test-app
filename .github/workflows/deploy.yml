@@ -27,18 +27,60 @@ jobs:
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Get Version
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       # Trigger Cloud Build to build & push Docker image
       - name: Build Docker image with Cloud Build
         run: |
           gcloud builds submit . \
             --config cloudbuild.yml \
-            --substitutions=COMMIT_SHA=${{ github.sha }} \
+            --substitutions=_VERSION=$VERSION \
             --project $PROJECT_ID
 
-      # Restart MIG to pull new :latest
-      - name: Restart MIG instances
+      - name: Create New Instance Template
         run: |
-          gcloud compute instance-groups managed rolling-action restart test-app-mig \
-            --zone=$REGION-c \
+          # Sanitized version string for resource naming (replace dots with dashes)
+          SAFE_VERSION=$(echo "$VERSION" | tr '.' '-')
+          TEMPLATE_NAME="test-app-template-${SAFE_VERSION}"
           
-          echo "Rolling restart started - instances will pull new container image"
+          echo "Creating template: $TEMPLATE_NAME for image version: $VERSION"
+          
+          # Create new template using the specific versioned image
+          gcloud compute instance-templates create-with-container $TEMPLATE_NAME \
+            --container-image=gcr.io/$PROJECT_ID/test-app:$VERSION \
+            --container-restart-policy=always \
+            --container-env=VERSION=$VERSION \
+            --container-ports=8080 \
+            --machine-type=e2-medium \
+            --tags=http-server,allow-health-check \
+            --network=default \
+            --service-account=test-app-sa@learning-gcp-22.iam.gserviceaccount.com \
+            --scopes=https://www.googleapis.com/auth/cloud-platform \
+            --boot-disk-size=10GB \
+            --boot-disk-type=pd-standard \
+            --image-project=cos-cloud \
+            --image-family=cos-stable \
+            --project=$PROJECT_ID
+
+      - name: Update MIG to New Template
+        run: |
+          SAFE_VERSION=$(echo "$VERSION" | tr '.' '-')
+          TEMPLATE_NAME="test-app-template-${SAFE_VERSION}"
+          
+          echo "Updating MIG test-app-mig to use template: $TEMPLATE_NAME"
+          
+          gcloud compute instance-groups managed set-instance-template test-app-mig \
+            --template=$TEMPLATE_NAME \
+            --zone=$REGION-c \
+            --project=$PROJECT_ID
+            
+          echo "Updating MIG test-app-mig to use template: $TEMPLATE_NAME"
+
+          gcloud compute instance-groups managed rolling-action start-update test-app-mig \
+            --version=template=$TEMPLATE_NAME \
+            --zone=$REGION-c \
+            --project=$PROJECT_ID
