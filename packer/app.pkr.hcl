@@ -13,11 +13,6 @@ source "googlecompute" "app" {
   source_image_family     = "ubuntu-2204-lts"
   source_image_project_id = ["ubuntu-os-cloud"]
 
-  # Faster build VM (doesn't affect final instances)
-  machine_type = "n2-standard-2"
-  disk_size    = 12
-  disk_type    = "pd-ssd"
-
   ssh_username = "packer"
   image_name   = "test-app-{{timestamp}}"
 }
@@ -25,28 +20,27 @@ source "googlecompute" "app" {
 build {
   sources = ["source.googlecompute.app"]
 
-  # Copy app files
-  provisioner "file" {
-    source      = "../main.js"
-    destination = "/tmp/main.js"
+  # First, create /opt/app with proper permissions so packer user can write to it
+  provisioner "shell" {
+    inline = [
+      "sudo mkdir -p /opt/app",
+      "sudo chown packer:packer /opt/app"
+    ]
   }
 
+  # Now copy files directly to /opt/app (no /tmp needed!)
   provisioner "file" {
-    source      = "../package.json"
-    destination = "/tmp/package.json"
+    source      = "../"
+    destination = "/opt/app"
   }
 
-  provisioner "file" {
-    source      = "../package-lock.json"
-    destination = "/tmp/package-lock.json"
-  }
-
+  # Copy systemd service file
   provisioner "file" {
     source      = "./test-app.service"
     destination = "/tmp/test-app.service"
   }
 
-  # Install Node + systemd service
+  # Install Node + setup app
   provisioner "shell" {
     inline = [
       "sudo apt update",
@@ -55,16 +49,11 @@ build {
       "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -",
       "sudo apt install -y nodejs",
 
-      "sudo mkdir -p /opt/app",
-      "sudo mv /tmp/main.js /opt/app/",
-      "sudo mv /tmp/package.json /opt/app/",
-      "sudo mv /tmp/package-lock.json /opt/app/",
-      "cd /opt/app",
-      "sudo npm install",
+      # Install dependencies
+      "cd /opt/app && npm install",
 
       # systemd service
       "sudo mv /tmp/test-app.service /etc/systemd/system/test-app.service",
-
       "sudo systemctl daemon-reload",
       "sudo systemctl enable test-app.service"
     ]

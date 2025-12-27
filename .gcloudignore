@@ -1,0 +1,13 @@
+# Don't upload these to Cloud Build
+.github/
+.git/
+node_modules/
+*.md
+load-test*.js
+LOAD_TEST.md
+
+# Keep these (by not listing them):
+# - main.js
+# - package.json
+# - package-lock.json
+# - packer/

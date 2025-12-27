@@ -31,7 +31,7 @@ app.get("/health", (req, res) => {
  */
 app.get("/", (req, res) => {
   burnCpu(1000); // adjust to control CPU usage
-  res.status(200).send("waited for 1 second");
+  res.status(200).send("waited for 1 second. Image built using Packer with cloud build");
 });
 
 /**

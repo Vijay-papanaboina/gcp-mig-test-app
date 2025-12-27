@@ -1,15 +1,15 @@
 import autocannon from "autocannon";
 
-const TARGET_URL = "http://35.207.215.167";
+// const TARGET_URL = "http://35.207.215.167";
+const TARGET_URL = "https://gcp-mig-test-app-cloud-run-824626066809.asia-south1.run.app";
 
-// Ramp-up configuration
+// Ramp-up configuration (gentler for CPU-intensive apps)
 const RAMP_STAGES = [
-  { connections: 5, duration: 60 }, // 5 connections for 1 min
-  { connections: 10, duration: 60 }, // 10 connections for 1 min
-  { connections: 20, duration: 60 }, // 20 connections for 1 min
-  { connections: 30, duration: 60 }, // 30 connections for 1 min
-  { connections: 40, duration: 60 }, // 40 connections for 1 min
-  { connections: 50, duration: 60 }, // 50 connections for 1 min
+  { connections: 4, duration: 60 }, // 2 connections for 2 min (let autoscaler react)
+  { connections: 6, duration: 60 }, // 4 connections for 2 min
+  { connections: 8, duration: 60 }, // 6 connections for 2 min
+  { connections: 10, duration: 60 }, // 8 connections for 2 min
+  { connections: 12, duration: 60 }, // 10 connections for 2 min
 ];
 
 // Live stats tracking
