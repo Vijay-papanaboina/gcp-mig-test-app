@@ -79,5 +79,5 @@ jobs:
             --zone=$REGION-c \
             --max-unavailable=0 \
             --max-surge=2 \
-            --replacement-method=SUBSTITUTE \
+            --replacement-method=substitute \
             --project=$PROJECT_ID
