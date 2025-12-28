@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
   burnCpu(1000); // adjust to control CPU usage
   res
     .status(200)
-    .send("waited for 1 second. Image built with cloud build with rollback templates");
+    .send("waited for 1 second. Image built with cloud build with rollback templates using replacement method substitute");
 });
 
 /**
